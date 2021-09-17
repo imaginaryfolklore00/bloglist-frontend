@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import Blog from './components/Blog'
+import Notification from './components/Notification'
+import Error from './components/Error'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import './index.css'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -11,6 +14,8 @@ const App = () => {
   const [newAuthor, setNewAuthor] = useState('')
   const [newUrl, setNewUrl] = useState('')
   const [user, setUser] = useState(null)
+  const [notificationMessage, setNotificationMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
   
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -40,10 +45,17 @@ const App = () => {
       )
       blogService.setToken(user.token)
       setUser(user)
+      setNotificationMessage(`login succesfull!`)
+      setTimeout(() => {
+        setNotificationMessage(null)
+      }, 5000)
       setUsername('')
       setPassword('')
     } catch (error) {
-      console.log('error logging in')      
+      setErrorMessage('wrong username or password')
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)   
     }
   }
 
@@ -68,6 +80,10 @@ const App = () => {
       .create(blogObject)
         .then(returnedBlog => {
           setBlogs(blogs.concat(returnedBlog))
+          setNotificationMessage(`a new blog ${returnedBlog.title} by ${returnedBlog.author} added`)
+          setTimeout(() => {
+            setNotificationMessage(null)
+          }, 5000)
           setNewTitle('')
           setNewAuthor('')
           setNewUrl('')
@@ -134,6 +150,8 @@ const App = () => {
   if(user === null) {
     return (
       <div>
+        <Notification message={notificationMessage} />
+        <Error message={errorMessage} />
         <h2>Log in to application</h2>
         {loginForm()}
       </div>
@@ -142,6 +160,8 @@ const App = () => {
 
   return (
     <div>
+      <Notification message={notificationMessage} />
+      <Error message={errorMessage} />
       <h2>blogs</h2>
           <div>
             <p>
