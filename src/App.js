@@ -129,6 +129,7 @@ const App = () => {
 
   }
 
+
   if(user === null) {
     return (
       <div>
@@ -139,6 +140,8 @@ const App = () => {
       </div>
     )
   }
+
+  blogs.sort((a, b) => b.likes - a.likes)
 
   return (
     <div>
