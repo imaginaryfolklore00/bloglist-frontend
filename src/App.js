@@ -16,11 +16,11 @@ const App = () => {
   const [user, setUser] = useState(null)
   const [notificationMessage, setNotificationMessage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
-  
+
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
-    )  
+    )
   }, [])
 
   useEffect(() => {
@@ -34,7 +34,7 @@ const App = () => {
 
   const handleLogin = async event => {
     event.preventDefault()
-    
+
     try {
       const user = await loginService.login({
         username, password
@@ -45,7 +45,7 @@ const App = () => {
       )
       blogService.setToken(user.token)
       setUser(user)
-      setNotificationMessage(`login succesfull!`)
+      setNotificationMessage('login succesfull!')
       setTimeout(() => {
         setNotificationMessage(null)
       }, 5000)
@@ -55,7 +55,7 @@ const App = () => {
       setErrorMessage('wrong username or password')
       setTimeout(() => {
         setErrorMessage(null)
-      }, 5000)   
+      }, 5000)
     }
   }
 
@@ -74,19 +74,19 @@ const App = () => {
       <div>
         username
         <input
-        type="text"
-        value={username}
-        name="Username"
-        onChange={({ target }) => setUsername(target.value)}
+          type="text"
+          value={username}
+          name="Username"
+          onChange={({ target }) => setUsername(target.value)}
         />
       </div>
       <div>
         password
         <input
-        type="password"
-        value={password}
-        name="Password"
-        onChange={({ target }) => setPassword(target.value)}
+          type="password"
+          value={password}
+          name="Password"
+          onChange={({ target }) => setPassword(target.value)}
         />
       </div>
       <button type="submit">login</button>
@@ -108,15 +108,15 @@ const App = () => {
     setBlogs(blogs.concat(addedBlog))
     setNotificationMessage(`a new blog ${addedBlog.title} by ${addedBlog.author} added`)
     setTimeout(() => {
-    setNotificationMessage(null)
+      setNotificationMessage(null)
     }, 5000)
   }
 
   const like = async blog => {
     try {
-      const likedBlog = {...blog, likes: blog.likes + 1}
+      const likedBlog = { ...blog, likes: blog.likes + 1 }
       setBlogs(blogs.map(blogPost => blogPost.id !== blog.id ? blogPost : likedBlog))
-      const blogToSend = {...likedBlog, user: blog.user.id}
+      const blogToSend = { ...likedBlog, user: blog.user.id }
       await blogService.update(blog.id, blogToSend)
     } catch (error) {
       setErrorMessage('an error occured when trying to like the blog post')
@@ -133,7 +133,7 @@ const App = () => {
         setBlogs(blogs.filter(b => b.id !== blog.id))
         setNotificationMessage(`${blog.title} by ${blog.author} deleted`)
         setTimeout(() => {
-        setNotificationMessage(null)
+          setNotificationMessage(null)
         }, 5000)
       } catch (error) {
         setErrorMessage('an error occured when trying to delete the blog post')
@@ -162,20 +162,20 @@ const App = () => {
       <Notification message={notificationMessage} />
       <Error message={errorMessage} />
       <h2>blogs</h2>
-          <div>
-            <p>
-              {user.name} logged-in
-              <button onClick={() => logout()}>
+      <div>
+        <p>
+          {user.name} logged-in
+          <button onClick={() => logout()}>
                 logout
-              </button>
-            </p>
-          </div>
-          <div>
-            {blogForm()}
-            {blogs.map(blog =>
-              <Blog key={blog.id} blog={blog} like={like} delete_blog={delete_blog} />
-            )}
-          </div>
+          </button>
+        </p>
+      </div>
+      <div>
+        {blogForm()}
+        {blogs.map(blog =>
+          <Blog key={blog.id} blog={blog} like={like} delete_blog={delete_blog} />
+        )}
+      </div>
     </div>
   )
 }
