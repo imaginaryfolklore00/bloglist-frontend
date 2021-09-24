@@ -62,6 +62,7 @@ const App = () => {
   const logout = () => {
     try {
       setUser(null)
+      blogService.setToken('')
       window.localStorage.removeItem('loggedBloglistUser')
     } catch (error) {
       console.log('error logging out')
@@ -92,6 +93,14 @@ const App = () => {
     </form>
   )
 
+  const blogFormRef = useRef()
+
+  const blogForm = () => (
+    <Togglable buttonLabel='create new blog' ref={blogFormRef}>
+      <BlogForm createBlog={addBlog} />
+    </Togglable>
+  )
+
   const addBlog = blogObject => {
     blogFormRef.current.toggleVisibility()
     blogService
@@ -105,13 +114,20 @@ const App = () => {
     })
   }
 
-  const blogFormRef = useRef()
+  const like = async blog => {
+    try {
+      const likedBlog = {...blog, user: blog.user.id, likes: blog.likes + 1}
+      await blogService.update(blog.id, likedBlog)
+      const updatedBlog = await blogService.getById(blog.id)
+      setBlogs(blogs.map(blogPost => blogPost.id !== blog.id ? blogPost : updatedBlog))
+    } catch (error) {
+      setErrorMessage('an error occured when trying to like the blog post')
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)   
+    }
 
-  const blogForm = () => (
-    <Togglable buttonLabel='create new blog' ref={blogFormRef}>
-      <BlogForm createBlog={addBlog} />
-    </Togglable>
-  )
+  }
 
   if(user === null) {
     return (
@@ -140,7 +156,7 @@ const App = () => {
           <div>
             {blogForm()}
             {blogs.map(blog =>
-              <Blog key={blog.id} blog={blog} />
+              <Blog key={blog.id} blog={blog} like={like} />
             )}
           </div>
     </div>
