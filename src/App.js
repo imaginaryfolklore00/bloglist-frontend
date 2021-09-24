@@ -101,34 +101,48 @@ const App = () => {
     </Togglable>
   )
 
-  const addBlog = blogObject => {
+  const addBlog = async blogObject => {
     blogFormRef.current.toggleVisibility()
-    blogService
-    .create(blogObject)
-    .then(returnedBlog => {
-        setBlogs(blogs.concat(returnedBlog))
-        setNotificationMessage(`a new blog ${returnedBlog.title} by ${returnedBlog.author} added`)
-        setTimeout(() => {
-        setNotificationMessage(null)
-        }, 5000)
-    })
+    const returnedBlog = await blogService.create(blogObject)
+    const addedBlog = await blogService.getById(returnedBlog.id)
+    setBlogs(blogs.concat(addedBlog))
+    setNotificationMessage(`a new blog ${addedBlog.title} by ${addedBlog.author} added`)
+    setTimeout(() => {
+    setNotificationMessage(null)
+    }, 5000)
   }
 
   const like = async blog => {
     try {
-      const likedBlog = {...blog, user: blog.user.id, likes: blog.likes + 1}
-      await blogService.update(blog.id, likedBlog)
-      const updatedBlog = await blogService.getById(blog.id)
-      setBlogs(blogs.map(blogPost => blogPost.id !== blog.id ? blogPost : updatedBlog))
+      const likedBlog = {...blog, likes: blog.likes + 1}
+      setBlogs(blogs.map(blogPost => blogPost.id !== blog.id ? blogPost : likedBlog))
+      const blogToSend = {...likedBlog, user: blog.user.id}
+      await blogService.update(blog.id, blogToSend)
     } catch (error) {
       setErrorMessage('an error occured when trying to like the blog post')
       setTimeout(() => {
         setErrorMessage(null)
-      }, 5000)   
+      }, 5000)
     }
-
   }
 
+  const delete_blog = async blog => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
+      try {
+        await blogService.delete_db(blog.id)
+        setBlogs(blogs.filter(b => b.id !== blog.id))
+        setNotificationMessage(`${blog.title} by ${blog.author} deleted`)
+        setTimeout(() => {
+        setNotificationMessage(null)
+        }, 5000)
+      } catch (error) {
+        setErrorMessage('an error occured when trying to delete the blog post')
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      }
+    }
+  }
 
   if(user === null) {
     return (
@@ -159,7 +173,7 @@ const App = () => {
           <div>
             {blogForm()}
             {blogs.map(blog =>
-              <Blog key={blog.id} blog={blog} like={like} />
+              <Blog key={blog.id} blog={blog} like={like} delete_blog={delete_blog} />
             )}
           </div>
     </div>
