@@ -74,3 +74,26 @@ test('url and likes are shown when expanded', () => {
     '4'
   )
 })
+
+test('like button is called correctly', () => {
+  const blog = {
+    title: 'some blog',
+    author: 'some author',
+    url: 'someurl.com',
+    likes: 4,
+    user: '61387c582681f50d346613e0'
+  }
+
+  const mockHandler = jest.fn()
+  const like = jest.fn()
+
+  const component = render(
+    <Blog blog={blog} like={like} delete_blog={mockHandler}/>
+  )
+
+  const button = component.getByText('like')
+  fireEvent.click(button)
+  fireEvent.click(button)
+
+  expect(like.mock.calls).toHaveLength(2)
+})
