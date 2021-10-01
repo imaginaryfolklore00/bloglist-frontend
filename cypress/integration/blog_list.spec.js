@@ -38,12 +38,10 @@ describe('Blog app', function() {
 
   describe('When logged in', function() {
     beforeEach(function() {
-      cy.get('#username').type('kt899')
-      cy.get('#password').type('fluid444')
-      cy.get('#login-button').click()
+      cy.login({ username: 'kt899', password: 'fluid444' })
     })
 
-    it.only('A blog can be created', function() {
+    it('A blog can be created', function() {
       cy.contains('create new blog').click()
       cy.get('#title').type('new title')
       cy.get('#author').type('new author')
@@ -51,6 +49,24 @@ describe('Blog app', function() {
       cy.get('#create-button').click()
       cy.get('.notification').contains('a new blog new title by new author added')
       cy.contains('new title new author')
+    })
+
+    describe('and a blog exists', function() {
+      beforeEach(function() {
+        cy.createBlog({
+          title: 'new title',
+          author: 'new author',
+          url: 'newurl.com'
+        })
+        cy.get('#view-button').click()
+      })
+
+      it('can be liked', function() {
+        cy.contains('likes 0')
+          .get('#like-button')
+          .click()
+        cy.contains('likes 1')
+      })
     })
   })
 })
