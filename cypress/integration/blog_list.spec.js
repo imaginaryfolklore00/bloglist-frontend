@@ -33,6 +33,8 @@ describe('Blog app', function() {
 
       cy.get('.error').should('contain', 'wrong username or password')
       cy.get('.error').should('have.css', 'color', 'rgb(255, 0, 0)')
+
+      cy.get('html').should('not.contain', 'Kate logged-in')
     })
   })
 
@@ -66,6 +68,13 @@ describe('Blog app', function() {
           .get('#like-button')
           .click()
         cy.contains('likes 1')
+      })
+
+      it('can be deleted', function() {
+        cy.get('#delete-button').click()
+        cy.get('.notification').contains('new title by new author deleted')
+
+        cy.get('html').should('not.contain', 'new title new author')
       })
     })
   })
