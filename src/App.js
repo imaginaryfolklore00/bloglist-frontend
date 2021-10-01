@@ -167,7 +167,7 @@ const App = () => {
       <div>
         <p>
           {user.name} logged-in
-          <button onClick={() => logout()}>
+          <button id='logout-button' onClick={() => logout()}>
             logout
           </button>
         </p>

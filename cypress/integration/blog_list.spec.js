@@ -16,4 +16,41 @@ describe('Blog app', function() {
     cy.contains('password')
     cy.contains('login')
   })
+
+  describe('Login',function() {
+    it('succeeds with correct credentials', function() {
+      cy.get('#username').type('kt899')
+      cy.get('#password').type('fluid444')
+      cy.get('#login-button').click()
+
+      cy.contains('Kate logged-in')
+    })
+
+    it('fails with wrong credentials', function() {
+      cy.get('#username').type('kt899')
+      cy.get('#password').type('wrong')
+      cy.get('#login-button').click()
+
+      cy.get('.error').should('contain', 'wrong username or password')
+      cy.get('.error').should('have.css', 'color', 'rgb(255, 0, 0)')
+    })
+  })
+
+  describe('When logged in', function() {
+    beforeEach(function() {
+      cy.get('#username').type('kt899')
+      cy.get('#password').type('fluid444')
+      cy.get('#login-button').click()
+    })
+
+    it.only('A blog can be created', function() {
+      cy.contains('create new blog').click()
+      cy.get('#title').type('new title')
+      cy.get('#author').type('new author')
+      cy.get('#url').type('newurl.com')
+      cy.get('#create-button').click()
+      cy.get('.notification').contains('a new blog new title by new author added')
+      cy.contains('new title new author')
+    })
+  })
 })
