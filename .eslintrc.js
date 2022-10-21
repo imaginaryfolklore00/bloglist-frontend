@@ -25,17 +25,13 @@ module.exports = {
             "warn",
             2  
         ],
-        "linebreak-style": [
-            "warn",
-            "linux"
-        ],
         "quotes": [
             "warn",
             "single"
         ],
         "semi": [
             "warn",
-            "never"
+            "always"
         ],
         "eqeqeq": "warn",
         "no-trailing-spaces": "warn",

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import Blog from './components/Blog';
 import Togglable from './components/Togglable';
 import BlogForm from './components/BlogForm';
@@ -7,15 +8,17 @@ import Error from './components/Error';
 import blogService from './services/blogs';
 import loginService from './services/login';
 import './index.css';
+import { setNotification } from './reducers/notificationReducer';
+import { setError } from './reducers/errorReducer';
 
 const App = () => {
+  const dispatch = useDispatch();
+
   const [blogs, setBlogs] = useState([]);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const [user, setUser] = useState(null);
-  const [notificationMessage, setNotificationMessage] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -38,21 +41,14 @@ const App = () => {
         username,
         password
       });
-
       window.localStorage.setItem('loggedBloglistUser', JSON.stringify(user));
       blogService.setToken(user.token);
       setUser(user);
-      setNotificationMessage('login succesfull!');
-      setTimeout(() => {
-        setNotificationMessage(null);
-      }, 5000);
+      dispatch(setNotification('login succesfull!', 5));
       setUsername('');
       setPassword('');
     } catch (error) {
-      setErrorMessage('wrong username or password');
-      setTimeout(() => {
-        setErrorMessage(null);
-      }, 5000);
+      dispatch(setError('wrong username or password', 5));
     }
   };
 
@@ -107,12 +103,12 @@ const App = () => {
     const returnedBlog = await blogService.create(blogObject);
     const addedBlog = await blogService.getById(returnedBlog.id);
     setBlogs(blogs.concat(addedBlog));
-    setNotificationMessage(
-      `a new blog ${addedBlog.title} by ${addedBlog.author} added`
+    dispatch(
+      setNotification(
+        `a new blog ${addedBlog.title} by ${addedBlog.author} added`,
+        5
+      )
     );
-    setTimeout(() => {
-      setNotificationMessage(null);
-    }, 5000);
   };
 
   const like = async (blog) => {
@@ -126,10 +122,9 @@ const App = () => {
       const blogToSend = { ...likedBlog, user: blog.user.id };
       await blogService.update(blog.id, blogToSend);
     } catch (error) {
-      setErrorMessage('an error occured when trying to like the blog post');
-      setTimeout(() => {
-        setErrorMessage(null);
-      }, 5000);
+      dispatch(
+        setError('an error occured when trying to like the blog post', 5)
+      );
     }
   };
 
@@ -138,15 +133,11 @@ const App = () => {
       try {
         await blogService.delete_db(blog.id);
         setBlogs(blogs.filter((b) => b.id !== blog.id));
-        setNotificationMessage(`${blog.title} by ${blog.author} deleted`);
-        setTimeout(() => {
-          setNotificationMessage(null);
-        }, 5000);
+        dispatch(setNotification(`${blog.title} by ${blog.author} deleted`, 5));
       } catch (error) {
-        setErrorMessage('an error occured when trying to delete the blog post');
-        setTimeout(() => {
-          setErrorMessage(null);
-        }, 5000);
+        dispatch(
+          setError('an error occured when trying to delete the blog post', 5)
+        );
       }
     }
   };
@@ -154,20 +145,20 @@ const App = () => {
   if (user === null) {
     return (
       <div>
-        <Notification message={notificationMessage} />
-        <Error message={errorMessage} />
+        <Notification />
+        <Error />
         <h2>Log in to application</h2>
         {loginForm()}
       </div>
     );
   }
 
-  blogs.sort((a, b) => b.likes - a.likes);
+  const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes);
 
   return (
     <div>
-      <Notification message={notificationMessage} />
-      <Error message={errorMessage} />
+      <Notification />
+      <Error />
       <h2>blogs</h2>
       <div>
         <p>
@@ -179,7 +170,7 @@ const App = () => {
       </div>
       <div>
         {blogForm()}
-        {blogs.map((blog) => (
+        {sortedBlogs.map((blog) => (
           <Blog
             key={blog.id}
             blog={blog}
